@@ -13,6 +13,12 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
+      // Vérification des variables d'environnement
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        setLoading(false);
+        return;
+      }
+
       setUser(getCurrentUser());
       await cleanupOldParcels();
       setLoading(false);
@@ -21,6 +27,29 @@ function App() {
   }, []);
 
   if (loading) return <div className="min-h-screen bg-gradient-to-br from-[#253265] via-[#1F3D86] to-[#1A223F] flex items-center justify-center text-white">Chargement...</div>;
+
+  // Affichage d'une erreur claire si la configuration est manquante
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    return (
+      <div className="min-h-screen bg-[#1A223F] flex items-center justify-center p-6 text-center">
+        <div className="bg-white/5 border border-red-500/30 p-8 rounded-[32px] max-w-md backdrop-blur-xl">
+          <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Settings className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-2xl font-black text-white mb-4">Configuration Manquante</h2>
+          <p className="text-gray-400 font-bold mb-8">
+            Les variables d'environnement Supabase ne sont pas configurées sur Netlify. 
+            L'application ne peut pas se connecter à la base de données.
+          </p>
+          <div className="text-left bg-black/20 p-4 rounded-xl font-mono text-xs text-red-300/80 space-y-2">
+            <p>VITE_SUPABASE_URL</p>
+            <p>VITE_SUPABASE_ANON_KEY</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) return <AuthPage onLogin={setUser} />;
 
   return (

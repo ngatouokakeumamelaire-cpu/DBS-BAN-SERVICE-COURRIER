@@ -4,7 +4,13 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL or Anon Key is missing. Please check your .env file.');
+  console.error('ERREUR CRITIQUE : Les variables d\'environnement Supabase sont manquantes.');
+  console.error('Veuillez configurer VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans Netlify.');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// On exporte quand même le client, mais on s'assure qu'il ne fasse pas planter l'importation
+// si les variables sont vides (createClient jettera une erreur si l'URL est vide)
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseAnonKey || 'placeholder'
+);

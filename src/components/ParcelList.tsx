@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, CheckCircle, Truck, Package, CreditCard } from 'lucide-react';
+import { Search, Filter, CheckCircle, Truck, Package, CreditCard, Printer } from 'lucide-react';
 import { getParcels, updateParcel, Parcel } from '../lib/auth';
 import { sendBothNotifications, createParcelArrivedMessage, createParcelDeliveredMessage, logNotification } from '../lib/notifications';
 
@@ -21,6 +21,82 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
   useEffect(() => {
     loadParcels();
   }, []);
+
+  const printReceipt = (parcel: Parcel) => {
+    const printWindow = window.open('', '_blank', 'width=600,height=600');
+    if (!printWindow) return;
+
+    const receiptContent = `
+      <html>
+        <head>
+          <title>Reçu DBS-BAN - ${parcel.code}</title>
+          <style>
+            @page { size: 100mm 100mm; margin: 0; }
+            body { 
+              font-family: 'Arial', sans-serif; 
+              margin: 0; 
+              padding: 20px;
+              width: 100mm;
+              height: 100mm;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+              border: 1px solid #eee;
+            }
+            .header { margin-bottom: 15px; }
+            .logo { font-size: 28px; font-weight: 900; margin: 0; color: #1e3a8a; }
+            .sub-logo { font-size: 14px; margin: 0; color: #444; font-weight: bold; }
+            .section-title { 
+              font-weight: bold; 
+              text-transform: uppercase; 
+              margin-top: 15px; 
+              margin-bottom: 5px;
+              border-bottom: 1px solid #000;
+              display: inline-block;
+              padding: 0 10px;
+              width: 100%;
+            }
+            .info { font-size: 12px; margin: 3px 0; }
+            .price { font-size: 16px; font-weight: 900; margin-top: 5px; color: #059669; }
+            .code { font-size: 14px; font-weight: bold; margin-top: 5px; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; }
+            @media print {
+              body { border: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="logo">DBS-BAN</h1>
+            <p class="sub-logo">Diomandé Ban Service</p>
+          </div>
+
+          <div class="section-title">EXPEDITEUR</div>
+          <div class="info"><strong>${parcel.senderName}</strong></div>
+          <div class="info">Contact: ${parcel.senderPhone}</div>
+          <div class="info">Colis: ${parcel.packageType}</div>
+          <div class="info">Destination: ${parcel.destinationCity}</div>
+          <div class="price">${parcel.price.toLocaleString()} FCFA</div>
+
+          <div class="section-title">DESTINATAIRE</div>
+          <div class="info"><strong>${parcel.recipientName}</strong></div>
+          <div class="info">Contact: ${parcel.recipientPhone}</div>
+          <div class="code">${parcel.code}</div>
+
+          <script>
+            window.onload = () => {
+              window.print();
+              setTimeout(() => window.close(), 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(receiptContent);
+    printWindow.document.close();
+  };
 
   const filteredParcels = parcels.filter(p => {
     const matchesSearch = p.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,12 +192,23 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
                     {!parcel.isPaid && (
                       <button 
                         onClick={() => handlePayment(parcel.id)} 
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
                       >
+                        <CreditCard className="w-3 h-3" />
                         Payer
                       </button>
                     )}
-                    {(isAdmin || parcel.destinationCity === userCity) && parcel.isPaid && parcel.status !== 'ARRIVE' && parcel.status !== 'LIVRE' && (
+                    {parcel.isPaid && (
+                      <button 
+                        onClick={() => printReceipt(parcel)} 
+                        className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/10 flex items-center gap-2"
+                        title="Imprimer le reçu"
+                      >
+                        <Printer className="w-3 h-3" />
+                        Reçu
+                      </button>
+                    )}
+                    {!isAdmin && parcel.destinationCity === userCity && parcel.isPaid && parcel.status !== 'ARRIVE' && parcel.status !== 'LIVRE' && (
                       <button 
                         onClick={() => handleStatusUpdate(parcel.id, 'ARRIVE')} 
                         className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20"
@@ -129,7 +216,7 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
                         Arrivé
                       </button>
                     )}
-                    {(isAdmin || parcel.destinationCity === userCity) && parcel.status === 'ARRIVE' && (
+                    {!isAdmin && parcel.destinationCity === userCity && parcel.status === 'ARRIVE' && (
                       <button 
                         onClick={() => handleStatusUpdate(parcel.id, 'LIVRE')} 
                         className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"

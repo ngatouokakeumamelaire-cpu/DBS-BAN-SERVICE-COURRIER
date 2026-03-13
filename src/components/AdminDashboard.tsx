@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Users, Package, DollarSign, TrendingUp, Plus, Eye, Shield, Trash2 } from 'lucide-react';
-import { getUsers, getParcels, createCourierUser, createAdminUser, deleteUser, getDailyRevenues, getCourierDailyStats } from '../lib/auth';
+import { getUsers, getParcels, createCourierUser, createAdminUser, deleteUser, archiveUser, getDailyRevenues, getCourierDailyStats } from '../lib/auth';
 import CreateCourierModal from './CreateCourierModal';
 import CreateAdminModal from './CreateAdminModal';
 import ParcelList from './ParcelList';
 import RevenueChart from './RevenueChart';
+import { Archive } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  const courierUsers = users.filter(u => u.role === 'courier');
+  const courierUsers = users.filter(u => u.role === 'courier' && !u.isArchived);
   const totalRevenue = parcels.filter(p => p.isPaid).reduce((sum, p) => sum + p.price, 0);
   const today = new Date().toISOString().split('T')[0];
   const todayRevenue = dailyRevenues.find(r => r.date === today)?.totalRevenue || 0;
@@ -52,12 +53,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleArchiveUser = async (userId: string, userName: string, userEmail: string) => {
+    if (userEmail === 'admin@dbs-ban.ci') {
+      alert("L'administrateur principal ne peut pas être archivé.");
+      return;
+    }
+    if (confirm(`Archiver l'utilisateur "${userName}" ? Il ne pourra plus se connecter. Il sera supprimé définitivement une fois que tous ses colis auront été purgés (après 30 jours).`)) {
+      const success = await archiveUser(userId);
+      if (success) loadData();
+    }
+  };
+
   const handleDeleteUser = async (userId: string, userName: string, userEmail: string) => {
     if (userEmail === 'admin@dbs-ban.ci') {
       alert("L'administrateur principal ne peut pas être supprimé.");
       return;
     }
-    if (confirm(`Supprimer l'utilisateur "${userName}" ?`)) {
+    if (confirm(`Supprimer IMMÉDIATEMENT l'utilisateur "${userName}" ? Attention, cela peut causer des erreurs si des colis lui sont encore rattachés.`)) {
       const success = await deleteUser(userId);
       if (success) loadData();
     }
@@ -190,14 +202,31 @@ export default function AdminDashboard() {
                   <td className="py-3"><span className={`px-2 py-1 rounded-full text-xs ${user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>{user.role}</span></td>
                   <td className="py-3 text-gray-300">{user.city || '-'}</td>
                   <td className="py-3">
-                    {user.email !== 'admin@dbs-ban.ci' && (
-                      <button 
-                        onClick={() => handleDeleteUser(user.id, user.name, user.email)} 
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {user.isArchived && (
+                        <span className="text-[10px] font-black bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded uppercase tracking-tighter">Archivé</span>
+                      )}
+                      {user.email !== 'admin@dbs-ban.ci' && (
+                        <>
+                          {!user.isArchived && (
+                            <button 
+                              onClick={() => handleArchiveUser(user.id, user.name, user.email)} 
+                              className="text-orange-400 hover:text-orange-300 transition-colors"
+                              title="Archiver"
+                            >
+                              <Archive className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => handleDeleteUser(user.id, user.name, user.email)} 
+                            className="text-red-400 hover:text-red-300 transition-colors"
+                            title="Supprimer définitivement"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

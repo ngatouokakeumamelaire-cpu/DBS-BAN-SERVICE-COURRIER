@@ -7,6 +7,7 @@ export interface User {
   role: 'admin' | 'courier';
   city?: string;
   createdAt: string;
+  isArchived?: boolean;
 }
 
 export interface Parcel {
@@ -57,10 +58,14 @@ export const login = async (email: string, password: string): Promise<User | nul
 
     if (error || !profile) return null;
 
-    // Simplified password check to match original logic
-    const isValid = (profile.role === 'admin' && password === 'admin123') ||
-                    (profile.role === 'courier' && password === 'courier123') ||
-                    profile.password === password;
+    // Ne pas autoriser la connexion si archivé
+    if (profile.is_archived) {
+      console.warn('Tentative de connexion sur un compte archivé');
+      return null;
+    }
+
+    // Check against stored password
+    const isValid = profile.password === password;
 
     if (isValid) {
       const user: User = {
@@ -98,7 +103,8 @@ export const getUsers = async (): Promise<User[]> => {
     name: p.name,
     role: p.role,
     city: p.city,
-    createdAt: p.created_at
+    createdAt: p.created_at,
+    isArchived: p.is_archived
   }));
 };
 
@@ -255,22 +261,54 @@ export const updateParcel = async (id: string, updates: Partial<Parcel>): Promis
   };
 };
 
+export const archiveUser = async (userId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_archived: true })
+    .eq('id', userId);
+  return !error;
+};
+
 export const cleanupOldParcels = async (): Promise<void> => {
   try {
+    // 1. Nettoyage des vieux colis livrés
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const dateString = thirtyDaysAgo.toISOString();
 
-    const { error } = await supabase
+    const { error: parcelError } = await supabase
       .from('parcels')
       .delete()
       .eq('status', 'LIVRE')
       .lt('delivered_at', dateString);
 
-    if (error) {
-      console.error('Error cleaning up old parcels:', error);
-    } else {
-      console.log('Old delivered parcels cleaned up successfully');
+    if (parcelError) {
+      console.error('Error cleaning up old parcels:', parcelError);
+    }
+
+    // 2. Nettoyage des utilisateurs archivés sans colis
+    const { data: archivedUsers, error: userError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('is_archived', true);
+
+    if (userError) {
+      console.error('Error fetching archived users:', userError);
+      return;
+    }
+
+    for (const user of archivedUsers) {
+      // Vérifier s'il reste des colis pour cet utilisateur
+      const { count, error: countError } = await supabase
+        .from('parcels')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', user.id);
+
+      if (!countError && count === 0) {
+        // Supprimer définitivement l'utilisateur
+        await supabase.from('profiles').delete().eq('id', user.id);
+        console.log(`Utilisateur archivé ${user.id} supprimé définitivement (plus de colis).`);
+      }
     }
   } catch (error) {
     console.error('Cleanup error:', error);
@@ -324,12 +362,29 @@ export const getCourierDailyStats = async (courierId: string) => {
 };
 
 export const changePassword = async (userId: string, currentPassword: string, newPassword: string): Promise<boolean> => {
-  // Simplified for demo
-  const { error } = await supabase
-    .from('profiles')
-    .update({ password: newPassword })
-    .eq('id', userId);
-  return !error;
+  try {
+    // Verify current password first
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('password')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !profile || profile.password !== currentPassword) {
+      return false;
+    }
+
+    // Update to new password
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ password: newPassword })
+      .eq('id', userId);
+      
+    return !updateError;
+  } catch (error) {
+    console.error('Change password error:', error);
+    return false;
+  }
 };
 
 // Initialisation de l'admin par défaut si nécessaire
