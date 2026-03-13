@@ -41,7 +41,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] shadow-2xl p-10 md:p-14">
           <div className="text-center mb-10">
             <div className="flex justify-center mb-6">
-              <div className="w-28 h-28 rounded-full bg-white p-1 shadow-xl">
+              <div className="w-32 h-32 rounded-full bg-white p-1 shadow-2xl border-4 border-white/10">
                 <img 
                   src="https://i.imgur.com/your-logo-here.png" 
                   alt="Logo DBS" 
@@ -50,8 +50,8 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                 />
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">DBS-BAN</h1>
-            <p className="text-gray-400 text-lg">Service Courrier - Connexion</p>
+            <h1 className="text-4xl font-black text-white mb-2 tracking-tight">DBS-BAN</h1>
+            <p className="text-blue-400 font-bold text-sm uppercase tracking-[0.2em]">Service Courrier - Connexion</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">

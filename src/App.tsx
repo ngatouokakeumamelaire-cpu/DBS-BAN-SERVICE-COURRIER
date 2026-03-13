@@ -56,8 +56,8 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-[#253265] via-[#1F3D86] to-[#1A223F]">
       <header className="bg-white/[0.03] border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex flex-col items-start gap-3">
-            <div className="w-14 h-14 rounded-xl bg-white p-1.5 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-2xl border border-white/10">
               <img 
                 src="https://i.imgur.com/your-logo-here.png" 
                 alt="Logo" 
@@ -66,8 +66,8 @@ function App() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-black text-white tracking-tight leading-none mb-1">DBS-BAN Service Courrier</h1>
-              <p className="text-[10px] font-bold text-blue-400/80 uppercase tracking-[0.2em]">
+              <h1 className="text-2xl font-black text-white tracking-tight leading-none mb-1.5">DBS-BAN</h1>
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">
                 {user.role === 'admin' ? 'ADMINISTRATION CENTRALE' : `RESPONSABLE - ${user.city}`}
               </p>
             </div>

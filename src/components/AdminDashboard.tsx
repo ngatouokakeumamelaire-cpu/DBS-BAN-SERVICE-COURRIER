@@ -33,9 +33,9 @@ export default function AdminDashboard() {
   const today = new Date().toISOString().split('T')[0];
   const todayRevenue = dailyRevenues.find(r => r.date === today)?.totalRevenue || 0;
 
-  const handleCreateCourier = async (email: string, name: string, city: string) => {
+  const handleCreateCourier = async (email: string, name: string, city: string, password?: string) => {
     try {
-      await createCourierUser(email, name, city);
+      await createCourierUser(email, name, city, password);
       loadData();
       setShowCreateModal(false);
     } catch (err) {
@@ -43,9 +43,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleCreateAdmin = async (email: string, name: string) => {
+  const handleCreateAdmin = async (email: string, name: string, password?: string) => {
     try {
-      await createAdminUser(email, name);
+      await createAdminUser(email, name, password);
       loadData();
       setShowCreateAdminModal(false);
     } catch (err) {

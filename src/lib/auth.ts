@@ -108,13 +108,13 @@ export const getUsers = async (): Promise<User[]> => {
   }));
 };
 
-export const createCourierUser = async (email: string, name: string, city: string): Promise<User> => {
+export const createCourierUser = async (email: string, name: string, city: string, password?: string): Promise<User> => {
   const newUser = {
     email,
     name,
     role: 'courier',
     city,
-    password: 'courier123',
+    password: password || 'courier123',
     created_at: new Date().toISOString()
   };
 
@@ -131,12 +131,12 @@ export const createCourierUser = async (email: string, name: string, city: strin
   };
 };
 
-export const createAdminUser = async (email: string, name: string): Promise<User> => {
+export const createAdminUser = async (email: string, name: string, password?: string): Promise<User> => {
   const newUser = {
     email,
     name,
     role: 'admin',
-    password: 'admin123',
+    password: password || 'admin123',
     created_at: new Date().toISOString()
   };
 
