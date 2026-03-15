@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, User, Phone, MapPin, DollarSign } from 'lucide-react';
+import { Package, User, Phone, MapPin, DollarSign, FileText } from 'lucide-react';
 import { createParcel, getCurrentUser } from '../lib/auth';
 import { sendBothNotifications, createParcelRegisteredMessage, logNotification } from '../lib/notifications';
 
@@ -30,23 +30,155 @@ export default function CreateParcelForm({ userId }: { userId: string }) {
     }
   };
 
+  const inputClasses = "w-full pl-12 pr-4 py-4 bg-white/[0.05] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/[0.08] transition-all";
+  const labelClasses = "block text-sm font-bold text-gray-300 mb-2 ml-1";
+  const iconClasses = "absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500";
+
   return (
-    <div className="bg-white/10 border border-white/20 rounded-xl p-6">
-      <h3 className="text-xl font-semibold text-white mb-6">Nouveau colis</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" placeholder="Expéditeur" value={formData.senderName} onChange={e => setFormData({...formData, senderName: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <input type="tel" placeholder="Tél Expéditeur" value={formData.senderPhone} onChange={e => setFormData({...formData, senderPhone: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <input type="text" placeholder="Destinataire" value={formData.recipientName} onChange={e => setFormData({...formData, recipientName: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <input type="tel" placeholder="Tél Destinataire" value={formData.recipientPhone} onChange={e => setFormData({...formData, recipientPhone: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <select value={formData.destinationCity} onChange={e => setFormData({...formData, destinationCity: e.target.value})} className="bg-slate-800 border border-white/20 rounded-lg p-3 text-white" required>
-            <option value="">Destination</option>
-            {cities.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <input type="text" placeholder="Type de colis" value={formData.packageType} onChange={e => setFormData({...formData, packageType: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <input type="number" placeholder="Tarif (FCFA)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
+    <div className="bg-white/[0.05] border border-white/10 rounded-[32px] p-8 backdrop-blur-sm">
+      <h3 className="text-2xl font-black text-white mb-8 tracking-tight">Nouveau Colis</h3>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Sender Info */}
+          <div className="space-y-2">
+            <label className={labelClasses}>Nom du déposant</label>
+            <div className="relative group">
+              <User className={iconClasses} />
+              <input 
+                type="text" 
+                value={formData.senderName} 
+                onChange={e => setFormData({...formData, senderName: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Téléphone du déposant</label>
+            <div className="relative group">
+              <Phone className={iconClasses} />
+              <input 
+                type="tel" 
+                value={formData.senderPhone} 
+                onChange={e => setFormData({...formData, senderPhone: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          {/* Recipient Info */}
+          <div className="space-y-2">
+            <label className={labelClasses}>Nom du destinataire</label>
+            <div className="relative group">
+              <User className={iconClasses} />
+              <input 
+                type="text" 
+                value={formData.recipientName} 
+                onChange={e => setFormData({...formData, recipientName: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Téléphone du destinataire</label>
+            <div className="relative group">
+              <Phone className={iconClasses} />
+              <input 
+                type="tel" 
+                value={formData.recipientPhone} 
+                onChange={e => setFormData({...formData, recipientPhone: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          {/* Parcel Details */}
+          <div className="space-y-2">
+            <label className={labelClasses}>Ville de destination</label>
+            <div className="relative group">
+              <MapPin className={iconClasses} />
+              <select 
+                value={formData.destinationCity} 
+                onChange={e => setFormData({...formData, destinationCity: e.target.value})} 
+                className={`${inputClasses} appearance-none cursor-pointer`}
+                required
+              >
+                <option value="" className="bg-[#1A223F]">Sélectionner une ville</option>
+                {cities.map(c => <option key={c} value={c} className="bg-[#1A223F]">{c}</option>)}
+              </select>
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Type de colis</label>
+            <div className="relative group">
+              <Package className={iconClasses} />
+              <input 
+                type="text" 
+                value={formData.packageType} 
+                onChange={e => setFormData({...formData, packageType: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Valeur déclarée</label>
+            <div className="relative group">
+              <FileText className={iconClasses} />
+              <input 
+                type="text" 
+                value={formData.value} 
+                onChange={e => setFormData({...formData, value: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Tarif d'expédition (FCFA)</label>
+            <div className="relative group">
+              <DollarSign className={iconClasses} />
+              <input 
+                type="number" 
+                value={formData.price} 
+                onChange={e => setFormData({...formData, price: e.target.value})} 
+                className={inputClasses} 
+                required 
+              />
+            </div>
+          </div>
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Créer le colis</button>
+
+        {/* Additional Notes */}
+        <div className="space-y-2">
+          <label className={labelClasses}>Notes additionnelles</label>
+          <textarea 
+            value={formData.notes} 
+            onChange={e => setFormData({...formData, notes: e.target.value})} 
+            className={`${inputClasses} min-h-[120px] py-4 resize-none`}
+            placeholder="Informations complémentaires sur le colis..."
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+        >
+          Créer le colis
+        </button>
       </form>
     </div>
   );

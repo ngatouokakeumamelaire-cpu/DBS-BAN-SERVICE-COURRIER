@@ -98,7 +98,7 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {user.role === 'admin' ? <AdminDashboard /> : <CourierDashboard user={user} />}
+        {user.role === 'admin' ? <AdminDashboard user={user} /> : <CourierDashboard user={user} />}
       </main>
 
       {showPasswordModal && <ChangePasswordModal userId={user.id} onClose={() => setShowPasswordModal(false)} />}

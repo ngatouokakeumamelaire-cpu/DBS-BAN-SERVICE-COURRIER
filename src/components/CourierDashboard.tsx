@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, DollarSign, CheckCircle, Clock, Plus } from 'lucide-react';
+import { Package, DollarSign, CheckCircle, Clock, Plus, Truck } from 'lucide-react';
 import { User, getCourierDailyStats, getParcels } from '../lib/auth';
 import ParcelList from './ParcelList';
 import CreateParcelForm from './CreateParcelForm';
@@ -25,9 +25,11 @@ export default function CourierDashboard({ user }: CourierDashboardProps) {
   }, [user.id]);
 
   const myParcels = allParcels.filter(p => p.createdBy === user.id);
+  const destinedParcelsCount = allParcels.filter(p => p.destinationCity === user.city).length;
   
   const statCards = stats ? [
     { title: 'Colis Créés', value: stats.totalParcels, icon: Package, color: 'bg-blue-500' },
+    { title: 'Colis Destinés', value: destinedParcelsCount, icon: Truck, color: 'bg-indigo-500' },
     { title: 'Revenus', value: `${stats.revenue.toLocaleString()} FCFA`, icon: DollarSign, color: 'bg-green-500' },
     { title: 'Payés', value: stats.paidParcels, icon: CheckCircle, color: 'bg-purple-500' },
     { title: 'Livrés', value: stats.deliveredParcels, icon: Clock, color: 'bg-orange-500' }
@@ -60,7 +62,7 @@ export default function CourierDashboard({ user }: CourierDashboardProps) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {statCards.map((stat, i) => (
           <div key={i} className="bg-white/[0.05] border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] transition-all group">
             <div className="flex items-center justify-between">
@@ -95,7 +97,7 @@ export default function CourierDashboard({ user }: CourierDashboardProps) {
             </div>
           </div>
           <div className="bg-white/[0.05] border border-white/10 rounded-[32px] p-8 backdrop-blur-sm">
-            <h3 className="text-xl font-black text-white mb-8 tracking-tight">Colis pour {user.city}</h3>
+            <h3 className="text-xl font-black text-white mb-8 tracking-tight">Colis pour {user.city} ({destinedParcelsCount})</h3>
             <div className="space-y-4">
               {allParcels.filter(p => p.destinationCity === user.city).slice(0, 5).map(parcel => (
                 <div key={parcel.id} className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 flex justify-between items-center hover:bg-white/[0.06] transition-all">
@@ -113,7 +115,7 @@ export default function CourierDashboard({ user }: CourierDashboardProps) {
         </div>
       )}
 
-      {activeTab === 'parcels' && <ParcelList isAdmin={false} userCity={user.city || ''} />}
+      {activeTab === 'parcels' && <ParcelList isAdmin={false} userCity={user.city || ''} userId={user.id} />}
       {activeTab === 'create' && <CreateParcelForm userId={user.id} />}
     </div>
   );

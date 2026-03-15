@@ -76,6 +76,10 @@ export const createParcelArrivedMessage = (parcelCode: string): string => {
   return `🎉 DBS-BAN SERVICE COURRIER\n\nBonne nouvelle ! Votre colis est arrivé.\n\n📦 Code: ${parcelCode}\n✅ Statut: Arrivé à destination\n\nVous pouvez venir le récupérer.\n\nMerci !`;
 };
 
+export const createParcelShippedMessage = (parcelCode: string): string => {
+  return `🚚 DBS-BAN SERVICE COURRIER\n\nVotre colis est maintenant en transit.\n\n📦 Code: ${parcelCode}\n🚀 Statut: En transit\n\nNous vous informerons dès son arrivée.\n\nMerci !`;
+};
+
 export const createParcelDeliveredMessage = (parcelCode: string): string => {
   return `✅ DBS-BAN SERVICE COURRIER\n\nVotre colis a été livré avec succès.\n\n📦 Code: ${parcelCode}\n🎯 Statut: Livré\n\nMerci d'avoir utilisé nos services !\n\nÀ bientôt !`;
 };

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, CheckCircle, Truck, Package, CreditCard, Printer } from 'lucide-react';
 import { getParcels, updateParcel, Parcel } from '../lib/auth';
-import { sendBothNotifications, createParcelArrivedMessage, createParcelDeliveredMessage, logNotification } from '../lib/notifications';
+import { sendBothNotifications, createParcelArrivedMessage, createParcelDeliveredMessage, createParcelShippedMessage, logNotification } from '../lib/notifications';
 
 interface ParcelListProps {
   isAdmin: boolean;
   userCity: string;
+  userId: string;
 }
 
-export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
+export default function ParcelList({ isAdmin, userCity, userId }: ParcelListProps) {
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -115,6 +116,9 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
       updates.arrivedAt = new Date().toISOString();
       sendBothNotifications(parcel.recipientPhone, createParcelArrivedMessage(parcel.code));
       logNotification('Arrivée', parcel.recipientPhone, parcel.code);
+    } else if (newStatus === 'EN_TRANSIT') {
+      sendBothNotifications(parcel.recipientPhone, createParcelShippedMessage(parcel.code));
+      logNotification('Expédition', parcel.recipientPhone, parcel.code);
     } else if (newStatus === 'LIVRE') {
       updates.deliveredAt = new Date().toISOString();
       sendBothNotifications(parcel.senderPhone, createParcelDeliveredMessage(parcel.code));
@@ -153,6 +157,7 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
             <option value="" className="bg-[#1A223F]">Tous les statuts</option>
             <option value="ENREGISTRE" className="bg-[#1A223F]">Enregistré</option>
             <option value="PAYE" className="bg-[#1A223F]">Payé</option>
+            <option value="EN_TRANSIT" className="bg-[#1A223F]">En transit</option>
             <option value="ARRIVE" className="bg-[#1A223F]">Arrivé</option>
             <option value="LIVRE" className="bg-[#1A223F]">Livré</option>
           </select>
@@ -182,6 +187,7 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                     parcel.status === 'LIVRE' ? 'bg-emerald-500/20 text-emerald-400' : 
                     parcel.status === 'ARRIVE' ? 'bg-orange-500/20 text-orange-400' :
+                    parcel.status === 'EN_TRANSIT' ? 'bg-purple-500/20 text-purple-400' :
                     'bg-blue-500/20 text-blue-400'
                   }`}>
                     {parcel.status}
@@ -189,13 +195,22 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
                 </td>
                 <td className="py-5 px-4">
                   <div className="flex gap-2">
-                    {!parcel.isPaid && (
+                    {!parcel.isPaid && parcel.createdBy === userId && (
                       <button 
                         onClick={() => handlePayment(parcel.id)} 
                         className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
                       >
                         <CreditCard className="w-3 h-3" />
                         Payer
+                      </button>
+                    )}
+                    {parcel.isPaid && parcel.status === 'PAYE' && parcel.createdBy === userId && (
+                      <button 
+                        onClick={() => handleStatusUpdate(parcel.id, 'EN_TRANSIT')} 
+                        className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
+                      >
+                        <Truck className="w-3 h-3" />
+                        Expédier
                       </button>
                     )}
                     {parcel.isPaid && (
@@ -208,7 +223,7 @@ export default function ParcelList({ isAdmin, userCity }: ParcelListProps) {
                         Reçu
                       </button>
                     )}
-                    {!isAdmin && parcel.destinationCity === userCity && parcel.isPaid && parcel.status !== 'ARRIVE' && parcel.status !== 'LIVRE' && (
+                    {!isAdmin && parcel.destinationCity === userCity && parcel.isPaid && parcel.status === 'EN_TRANSIT' && (
                       <button 
                         onClick={() => handleStatusUpdate(parcel.id, 'ARRIVE')} 
                         className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20"

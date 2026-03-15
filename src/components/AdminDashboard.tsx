@@ -7,7 +7,9 @@ import ParcelList from './ParcelList';
 import RevenueChart from './RevenueChart';
 import { Archive } from 'lucide-react';
 
-export default function AdminDashboard() {
+import { User } from '../lib/auth';
+
+export default function AdminDashboard({ user }: { user: User }) {
   const [users, setUsers] = useState<any[]>([]);
   const [parcels, setParcels] = useState<any[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -31,7 +33,9 @@ export default function AdminDashboard() {
   const courierUsers = users.filter(u => u.role === 'courier' && !u.isArchived);
   const totalRevenue = parcels.filter(p => p.isPaid).reduce((sum, p) => sum + p.price, 0);
   const today = new Date().toISOString().split('T')[0];
-  const todayRevenue = dailyRevenues.find(r => r.date === today)?.totalRevenue || 0;
+  const todayRevenue = parcels
+    .filter(p => p.isPaid && p.paidAt?.startsWith(today))
+    .reduce((sum, p) => sum + p.price, 0);
 
   const handleCreateCourier = async (email: string, name: string, city: string, password?: string) => {
     try {
@@ -135,16 +139,21 @@ export default function AdminDashboard() {
               {courierUsers.map(user => {
                 const userParcels = parcels.filter(p => p.createdBy === user.id);
                 const userRevenue = userParcels.filter(p => p.isPaid).reduce((sum, p) => sum + p.price, 0);
+                const userTodayRevenue = userParcels
+                  .filter(p => p.isPaid && p.paidAt?.startsWith(today))
+                  .reduce((sum, p) => sum + p.price, 0);
                 const deliveredCount = userParcels.filter(p => p.status === 'LIVRE').length;
+                const destinedCount = parcels.filter(p => p.destinationCity === user.city).length;
                 
                 return (
                   <div key={user.id} className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 flex justify-between items-center hover:bg-white/[0.06] transition-all">
                     <div>
                       <p className="font-black text-white text-lg">{user.name}</p>
-                      <p className="text-sm font-bold text-gray-400">{user.city}</p>
+                      <p className="text-sm font-bold text-gray-400">{user.city} ({destinedCount} à recevoir)</p>
                     </div>
                     <div className="text-right">
                       <p className="text-emerald-400 font-black">{userRevenue.toLocaleString()} FCFA</p>
+                      <p className="text-[10px] font-black text-blue-400 uppercase tracking-wider">Aujourd'hui: {userTodayRevenue.toLocaleString()} FCFA</p>
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{deliveredCount} livrés</p>
                     </div>
                   </div>
@@ -191,17 +200,21 @@ export default function AdminDashboard() {
                 <th className="py-3 text-gray-300">Email</th>
                 <th className="py-3 text-gray-300">Rôle</th>
                 <th className="py-3 text-gray-300">Ville</th>
+                <th className="py-3 text-gray-300">Destinés</th>
                 <th className="py-3 text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
-                <tr key={user.id} className="border-b border-white/5">
-                  <td className="py-3 text-white">{user.name}</td>
-                  <td className="py-3 text-gray-300">{user.email}</td>
-                  <td className="py-3"><span className={`px-2 py-1 rounded-full text-xs ${user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>{user.role}</span></td>
-                  <td className="py-3 text-gray-300">{user.city || '-'}</td>
-                  <td className="py-3">
+              {users.map(user => {
+                const destinedCount = parcels.filter(p => p.destinationCity === user.city).length;
+                return (
+                  <tr key={user.id} className="border-b border-white/5">
+                    <td className="py-3 text-white">{user.name}</td>
+                    <td className="py-3 text-gray-300">{user.email}</td>
+                    <td className="py-3"><span className={`px-2 py-1 rounded-full text-xs ${user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>{user.role}</span></td>
+                    <td className="py-3 text-gray-300">{user.city || '-'}</td>
+                    <td className="py-3 text-gray-300">{user.role === 'courier' ? destinedCount : '-'}</td>
+                    <td className="py-3">
                     <div className="flex items-center gap-3">
                       {user.isArchived && (
                         <span className="text-[10px] font-black bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded uppercase tracking-tighter">Archivé</span>
@@ -229,13 +242,14 @@ export default function AdminDashboard() {
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              );
+            })}
+          </tbody>
           </table>
         </div>
       )}
 
-      {activeTab === 'parcels' && <ParcelList isAdmin={true} userCity="" />}
+      {activeTab === 'parcels' && <ParcelList isAdmin={true} userCity="" userId={user.id} />}
       {activeTab === 'revenue' && <RevenueChart />}
 
       {showCreateModal && <CreateCourierModal onClose={() => setShowCreateModal(false)} onCreate={handleCreateCourier} />}

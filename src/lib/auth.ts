@@ -329,9 +329,16 @@ const generateParcelCode = (): string => {
 };
 
 export const getDailyRevenues = async (): Promise<DailyRevenue[]> => {
-  const { data, error } = await supabase.from('daily_revenues').select('*').order('date', { ascending: true });
+  const { data, error } = await supabase
+    .from('daily_revenues')
+    .select('*')
+    .order('date', { ascending: false })
+    .limit(7);
+    
   if (error) return [];
-  return data.map(r => ({
+  
+  // Sort back to ascending for the chart
+  return data.reverse().map(r => ({
     date: r.date,
     totalRevenue: r.total_revenue,
     totalParcels: r.total_parcels,
