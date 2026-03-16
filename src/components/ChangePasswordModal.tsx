@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { X, Lock, CheckCircle } from 'lucide-react';
+import { X, Lock, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { changePassword } from '../lib/auth';
 
 export default function ChangePasswordModal({ userId, onClose }: any) {
   const [formData, setFormData] = useState({ current: '', new: '', confirm: '' });
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,9 +28,60 @@ export default function ChangePasswordModal({ userId, onClose }: any) {
       <div className="bg-slate-900 border border-white/20 rounded-xl p-6 w-full max-w-md">
         <h3 className="text-lg font-semibold text-white mb-6">Changer mot de passe</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="password" placeholder="Actuel" value={formData.current} onChange={e => setFormData({...formData, current: e.target.value})} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
-          <input type="password" placeholder="Nouveau" value={formData.new} onChange={e => setFormData({...formData, new: e.target.value})} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white" required minLength={6} />
-          <input type="password" placeholder="Confirmer" value={formData.confirm} onChange={e => setFormData({...formData, confirm: e.target.value})} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white" required />
+          <div className="relative">
+            <input 
+              type={showCurrent ? "text" : "password"} 
+              placeholder="Actuel" 
+              value={formData.current} 
+              onChange={e => setFormData({...formData, current: e.target.value})} 
+              className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pr-10 text-white" 
+              required 
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrent(!showCurrent)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className="relative">
+            <input 
+              type={showNew ? "text" : "password"} 
+              placeholder="Nouveau" 
+              value={formData.new} 
+              onChange={e => setFormData({...formData, new: e.target.value})} 
+              className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pr-10 text-white" 
+              required 
+              minLength={6} 
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew(!showNew)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className="relative">
+            <input 
+              type={showConfirm ? "text" : "password"} 
+              placeholder="Confirmer" 
+              value={formData.confirm} 
+              onChange={e => setFormData({...formData, confirm: e.target.value})} 
+              className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pr-10 text-white" 
+              required 
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
           <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg">Modifier</button>
           <button type="button" onClick={onClose} className="w-full text-gray-400">Annuler</button>
         </form>
