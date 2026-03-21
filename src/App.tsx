@@ -34,8 +34,8 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1A223F] flex flex-col items-center justify-center text-white p-6">
-        <div className="w-24 h-24 rounded-2xl bg-white p-2 shadow-2xl border border-white/10 mb-8 animate-pulse">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        <div className="w-40 h-40 rounded-full bg-white shadow-2xl border-4 border-white/10 mb-8 animate-pulse overflow-hidden">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
         <p className="text-xl font-black tracking-tight mb-2">Chargement de DBS-BAN...</p>
@@ -79,11 +79,11 @@ function App() {
       <header className="bg-white/[0.03] border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-2xl border border-white/10">
+            <div className="w-24 h-24 rounded-full bg-white shadow-2xl border-2 border-white/10 overflow-hidden">
               <img 
                 src="/logo.png" 
                 alt="Logo" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
             </div>

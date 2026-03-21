@@ -42,11 +42,11 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] shadow-2xl p-10 md:p-14">
           <div className="text-center mb-10">
             <div className="flex justify-center mb-6">
-              <div className="w-32 h-32 rounded-full bg-white p-1 shadow-2xl border-4 border-white/10">
+              <div className="w-48 h-48 rounded-full bg-white shadow-2xl border-4 border-white/10 overflow-hidden">
                 <img 
                   src="/logo.png" 
                   alt="Logo DBS" 
-                  className="w-full h-full object-contain rounded-full"
+                  className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
               </div>
