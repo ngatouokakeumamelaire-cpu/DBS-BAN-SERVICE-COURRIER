@@ -34,6 +34,9 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1A223F] flex flex-col items-center justify-center text-white p-6">
+        <div className="w-24 h-24 rounded-2xl bg-white p-2 shadow-2xl border border-white/10 mb-8 animate-pulse">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        </div>
         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
         <p className="text-xl font-black tracking-tight mb-2">Chargement de DBS-BAN...</p>
         <p className="text-gray-400 font-bold text-sm">Vérification de la connexion...</p>
@@ -78,7 +81,7 @@ function App() {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-2xl border border-white/10">
               <img 
-                src="https://i.imgur.com/your-logo-here.png" 
+                src="/logo.png" 
                 alt="Logo" 
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
