@@ -8,9 +8,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Veuillez configurer VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans Netlify.');
 }
 
-// On exporte quand même le client, mais on s'assure qu'il ne fasse pas planter l'importation
-// si les variables sont vides (createClient jettera une erreur si l'URL est vide)
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder'
-);
+let supabaseClient;
+
+try {
+  supabaseClient = createClient(
+    supabaseUrl || 'https://placeholder.supabase.co', 
+    supabaseAnonKey || 'placeholder'
+  );
+} catch (err) {
+  console.error('Supabase client creation error:', err);
+  // Fallback to a dummy client that won't crash on import
+  supabaseClient = {
+    from: () => ({
+      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+      insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+      update: () => ({ eq: () => Promise.resolve({ data: null, error: null }) }),
+      delete: () => ({ eq: () => Promise.resolve({ data: null, error: null }) }),
+    })
+  } as any;
+}
+
+export const supabase = supabaseClient;

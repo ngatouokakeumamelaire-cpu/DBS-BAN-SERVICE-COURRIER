@@ -13,20 +13,39 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
-      // Vérification des variables d'environnement
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        setLoading(false);
-        return;
-      }
+      try {
+        // Vérification des variables d'environnement
+        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+          setLoading(false);
+          return;
+        }
 
-      setUser(getCurrentUser());
-      await cleanupOldParcels();
-      setLoading(false);
+        setUser(getCurrentUser());
+        await cleanupOldParcels();
+      } catch (err) {
+        console.error('Initialization error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     initApp();
   }, []);
 
-  if (loading) return <div className="min-h-screen bg-gradient-to-br from-[#253265] via-[#1F3D86] to-[#1A223F] flex items-center justify-center text-white">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#1A223F] flex flex-col items-center justify-center text-white p-6">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p className="text-xl font-black tracking-tight mb-2">Chargement de DBS-BAN...</p>
+        <p className="text-gray-400 font-bold text-sm">Vérification de la connexion...</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-8 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+        >
+          Actualiser la page
+        </button>
+      </div>
+    );
+  }
 
   // Affichage d'une erreur claire si la configuration est manquante
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
