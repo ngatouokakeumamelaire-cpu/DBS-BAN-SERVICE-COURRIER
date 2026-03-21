@@ -89,8 +89,8 @@ export default function AdminDashboard({ user }: { user: User }) {
   return (
     <div className="space-y-8">
       {/* Navigation Tabs */}
-      <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-1.5 backdrop-blur-sm">
-        <div className="flex flex-wrap gap-1">
+      <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-1.5 backdrop-blur-sm overflow-x-auto no-scrollbar">
+        <div className="flex flex-nowrap gap-1 min-w-max">
           {[
             { key: 'overview', label: 'Vue d\'ensemble', icon: Eye },
             { key: 'couriers', label: 'Utilisateurs', icon: Users },
@@ -100,7 +100,7 @@ export default function AdminDashboard({ user }: { user: User }) {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${
                 activeTab === tab.key 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
                   : 'text-gray-400 hover:text-white hover:bg-white/5'

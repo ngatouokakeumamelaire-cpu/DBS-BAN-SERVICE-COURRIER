@@ -1,0 +1,21 @@
+{
+  "name": "DBS-BAN Service Courrier",
+  "short_name": "DBS-BAN",
+  "description": "Système de gestion de courrier intégré pour DBS-BAN Transport.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A223F",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/dbsban/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/dbsban/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
